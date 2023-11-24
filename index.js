@@ -28,18 +28,17 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+    const featureCardCollection = client
+      .db('xenricDB')
+      .collection('featureCards');
 
+    // feature cards on home related
 
-
-
-
-
-
-
-
-
-
-
+    app.get('/featureCards', async (req, res) => {
+      const cursor = featureCardCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
