@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -43,10 +43,24 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/featureCards/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await featureCardCollection.findOne(query);
+      res.send(result);
+    });
+
     // trending cards related---------------
     app.get('/trendingCards', async (req, res) => {
       const cursor = trendingCardCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get('/trendingCards/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await trendingCardCollection.findOne(query);
       res.send(result);
     });
 
