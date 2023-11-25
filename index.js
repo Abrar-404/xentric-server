@@ -32,10 +32,20 @@ async function run() {
       .db('xenricDB')
       .collection('featureCards');
 
-    // feature cards on home related
+    const trendingCardCollection = client
+      .db('xenricDB')
+      .collection('trendingCards');
 
+    // feature cards on home related---------------
     app.get('/featureCards', async (req, res) => {
       const cursor = featureCardCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // trending cards related---------------
+    app.get('/trendingCards', async (req, res) => {
+      const cursor = trendingCardCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
