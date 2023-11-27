@@ -36,6 +36,47 @@ async function run() {
       .db('xenricDB')
       .collection('trendingCards');
 
+    const addProductsCollection = client
+      .db('xenricDB')
+      .collection('addProducts');
+    
+    
+    // own middleware
+   const verifyToken = (req, res, next) => {
+     console.log(req.headers.authorization);
+     if (!req.headers.authorization) {
+       return res.status(401).send({ message: 'Forbidden Access' });
+     }
+     const token = req.headers.authorization.split(' ')[1];
+     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+       if (error) {
+         return res.status(401).send({ message: 'Forbidden Access' });
+       }
+       req.decoded = decoded;
+       next();
+     });
+    };
+    
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'Unauthorized Access' });
+      }
+      next();
+    };
+
+    // jwt related api
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1h',
+      });
+      res.send({ token });
+    });
+
     // feature cards on home related---------------
     app.get('/featureCards', async (req, res) => {
       const cursor = featureCardCollection.find();
@@ -62,6 +103,12 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await trendingCardCollection.findOne(query);
       res.send(result);
+    });
+
+    // products add related
+    app.post('/addProducts', async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
     });
 
     // Send a ping to confirm a successful connection
