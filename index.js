@@ -36,27 +36,24 @@ async function run() {
       .db('xenricDB')
       .collection('trendingCards');
 
-    const addProductsCollection = client
-      .db('xenricDB')
-      .collection('addProducts');
-    
-    
+    const myProductsCollection = client.db('xenricDB').collection('myProducts');
+
     // own middleware
-   const verifyToken = (req, res, next) => {
-     console.log(req.headers.authorization);
-     if (!req.headers.authorization) {
-       return res.status(401).send({ message: 'Forbidden Access' });
-     }
-     const token = req.headers.authorization.split(' ')[1];
-     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
-       if (error) {
-         return res.status(401).send({ message: 'Forbidden Access' });
-       }
-       req.decoded = decoded;
-       next();
-     });
+    const verifyToken = (req, res, next) => {
+      console.log(req.headers.authorization);
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'Forbidden Access' });
+      }
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+        if (error) {
+          return res.status(401).send({ message: 'Forbidden Access' });
+        }
+        req.decoded = decoded;
+        next();
+      });
     };
-    
+
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const query = { email: email };
@@ -106,9 +103,11 @@ async function run() {
     });
 
     // products add related
-    app.post('/addProducts', async (req, res) => {
+    app.post('/myProducts', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
+      const result = await myProductsCollection.insertOne(productsAdd);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
