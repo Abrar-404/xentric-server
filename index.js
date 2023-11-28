@@ -38,7 +38,9 @@ async function run() {
 
     const myProductsCollection = client.db('xenricDB').collection('myProducts');
 
-    const addProductsCollection = client.db('xenricDB').collection('addProducts');
+    const addProductsCollection = client
+      .db('xenricDB')
+      .collection('addProducts');
 
     // own middleware
     const verifyToken = (req, res, next) => {
@@ -112,19 +114,19 @@ async function run() {
       res.send(result);
     });
 
-    app.post('/myProducts', async (req, res) => {
+    app.post('/myProducts', verifyToken, async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
       const result = await myProductsCollection.insertOne(productsAdd);
       res.send(result);
     });
 
-    app.post('/addProducts', async (req, res) => {
-      const addProduct = req.body
+    app.post('/addProducts', verifyToken, async (req, res) => {
+      const addProduct = req.body;
       console.log(addProduct);
-      const result = await addProductsCollection.insertOne(addProduct)
-      res.send(result)
-    })
+      const result = await addProductsCollection.insertOne(addProduct);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
