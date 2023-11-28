@@ -38,6 +38,8 @@ async function run() {
 
     const myProductsCollection = client.db('xenricDB').collection('myProducts');
 
+    const addProductsCollection = client.db('xenricDB').collection('addProducts');
+
     // own middleware
     const verifyToken = (req, res, next) => {
       console.log(req.headers.authorization);
@@ -104,8 +106,9 @@ async function run() {
 
     // products add related
     app.get('/myProducts', async (req, res) => {
-      const cursor = myProductsCollection.find();
-      const result = await cursor.toArray();
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await myProductsCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -115,6 +118,13 @@ async function run() {
       const result = await myProductsCollection.insertOne(productsAdd);
       res.send(result);
     });
+
+    app.post('/addProducts', async (req, res) => {
+      const addProduct = req.body
+      console.log(addProduct);
+      const result = await addProductsCollection.insertOne(addProduct)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
