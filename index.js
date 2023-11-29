@@ -130,6 +130,22 @@ async function run() {
       res.send(result);
     });
 
+    app.patch('/myProducts/:id', async (req, res) => {
+      const item = req.body
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          image: item.img
+        },
+      };
+      const result = await myProductsCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+    });
+
     app.delete('/myProducts/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
