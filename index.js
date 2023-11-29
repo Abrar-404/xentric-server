@@ -42,6 +42,8 @@ async function run() {
       .db('xenricDB')
       .collection('addProducts');
 
+    const userCollection = client.db('xenricDB').collection('users');
+
     // own middleware
     const verifyToken = (req, res, next) => {
       console.log(req.headers.authorization);
@@ -114,6 +116,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/myProducts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await myProductsCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post('/myProducts', verifyToken, async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
@@ -122,10 +131,10 @@ async function run() {
     });
 
     app.delete('/myProducts/:id', verifyToken, async (req, res) => {
-      const id = req.params.id
-      const query = { _id: new ObjectId(id) }
-      const result = await myProductsCollection.deleteOne(query)
-      res.send(result)
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await myProductsCollection.deleteOne(query);
+      res.send(result);
     });
 
     app.post('/addProducts', verifyToken, async (req, res) => {
@@ -134,8 +143,6 @@ async function run() {
       const result = await addProductsCollection.insertOne(addProduct);
       res.send(result);
     });
-
-    
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
