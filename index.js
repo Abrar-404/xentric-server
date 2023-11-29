@@ -121,12 +121,21 @@ async function run() {
       res.send(result);
     });
 
+    app.delete('/myProducts/:id', verifyToken, async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await myProductsCollection.deleteOne(query)
+      res.send(result)
+    });
+
     app.post('/addProducts', verifyToken, async (req, res) => {
       const addProduct = req.body;
       console.log(addProduct);
       const result = await addProductsCollection.insertOne(addProduct);
       res.send(result);
     });
+
+    
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
