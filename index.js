@@ -44,6 +44,8 @@ async function run() {
 
     const userCollection = client.db('xenricDB').collection('users');
 
+    const allItemCollection = client.db('xenricDB').collection('allItem');
+
     // own middleware
     const verifyToken = (req, res, next) => {
       console.log(req.headers.authorization);
@@ -130,20 +132,35 @@ async function run() {
       res.send(result);
     });
 
+    app.post('/allItem', verifyToken, async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await allItemCollection.insertOne(productsAdd);
+      res.send(result);
+    });
+
     app.patch('/myProducts/:id', async (req, res) => {
-      const item = req.body
-      const id = req.params.id
-      const filter = { _id: new ObjectId(id) }
+      const item = req.body;
+      console.log(item);
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const option = {
+        upsert: true,
+      };
       const updatedDoc = {
         $set: {
           name: item.name,
           description: item.description,
           price: item.price,
-          image: item.img
+          img: item.img,
         },
       };
-      const result = await myProductsCollection.updateOne(filter, updatedDoc)
-      res.send(result)
+      const result = await myProductsCollection.updateOne(
+        filter,
+        updatedDoc,
+        option
+      );
+      res.send(result);
     });
 
     app.delete('/myProducts/:id', verifyToken, async (req, res) => {
@@ -157,6 +174,13 @@ async function run() {
       const addProduct = req.body;
       console.log(addProduct);
       const result = await addProductsCollection.insertOne(addProduct);
+      res.send(result);
+    });
+
+    // all Item page
+    app.get('/allItem', async (req, res) => {
+      const cursor = allItemCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     });
 
