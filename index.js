@@ -132,13 +132,6 @@ async function run() {
       res.send(result);
     });
 
-    app.post('/allItem', verifyToken, async (req, res) => {
-      const productsAdd = req.body;
-      console.log(productsAdd);
-      const result = await allItemCollection.insertOne(productsAdd);
-      res.send(result);
-    });
-
     app.patch('/myProducts/:id', async (req, res) => {
       const item = req.body;
       console.log(item);
@@ -181,6 +174,20 @@ async function run() {
     app.get('/allItem', async (req, res) => {
       const cursor = allItemCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post('/allItem', verifyToken, async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await allItemCollection.insertOne(productsAdd);
+      res.send(result);
+    });
+
+    app.get('/allItem/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allItemCollection.findOne(query);
       res.send(result);
     });
 
