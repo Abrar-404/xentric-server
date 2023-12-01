@@ -8,7 +8,16 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+// middleware
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    optionsSuccessStatus: 204,
+    exposedHeaders: ['Access-Control-Allow-Headers'],
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -42,7 +51,7 @@ async function run() {
       .db('xenricDB')
       .collection('addProducts');
 
-    const userCollection = client.db('xenricDB').collection('users');
+    // const userCollection = client.db('xenricDB').collection('users');
 
     const allItemCollection = client.db('xenricDB').collection('allItem');
 
@@ -68,7 +77,7 @@ async function run() {
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const query = { email: email };
-      const user = await userCollection.findOne(query);
+      const user = await usersCollection.findOne(query);
       const isAdmin = user?.role === 'admin';
       if (!isAdmin) {
         return res.status(403).send({ message: 'Unauthorized Access' });
@@ -195,14 +204,78 @@ async function run() {
     });
 
     // users related api
+    app.get('/users', async (req, res) => {
+      console.log(req.headers);
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get('/user/admin/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'Unauthorized Access' });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user?.role === 'admin';
+      }
+      res.send({ admin });
+    });
+
+    app.get('/users/:email', verifyAdmin, verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post('/users', async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
-      const existingUser = await userCollection.findOne(query);
+      const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
         return res.send({ message: 'User already exists', insertedId: null });
       }
-      const result = await userCollection.insertOne(user);
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    app.patch('/users/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updatedDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+
+      try {
+        const result = await usersCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
       res.send(result);
     });
 
