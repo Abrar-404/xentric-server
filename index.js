@@ -46,6 +46,9 @@ async function run() {
 
     const allItemCollection = client.db('xenricDB').collection('allItem');
 
+    // users, admin and moderator related
+    const usersCollection = client.db('xenricDB').collection('users');
+
     // own middleware
     const verifyToken = (req, res, next) => {
       console.log(req.headers.authorization);
@@ -188,6 +191,18 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await allItemCollection.findOne(query);
+      res.send(result);
+    });
+
+    // users related api
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: 'User already exists', insertedId: null });
+      }
+      const result = await userCollection.insertOne(user);
       res.send(result);
     });
 
