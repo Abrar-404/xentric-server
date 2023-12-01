@@ -224,6 +224,20 @@ async function run() {
       res.send({ admin });
     });
 
+    app.get('/user/moderator/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'Unauthorized Access' });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      let moderator = false;
+      if (user) {
+        moderator = user?.role === 'moderator';
+      }
+      res.send({ moderator });
+    });
+
     app.get('/users/:email', verifyAdmin, verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
