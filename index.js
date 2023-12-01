@@ -203,7 +203,7 @@ async function run() {
       res.send(result);
     });
 
-    // users related api
+    // users, moderator, admin related api---------------------------------
     app.get('/users', async (req, res) => {
       console.log(req.headers);
       const result = await usersCollection.find().toArray();
@@ -254,6 +254,18 @@ async function run() {
       res.send(result);
     });
 
+    app.patch('/users/moderator/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'moderator',
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     app.patch('/users/admin/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
@@ -272,12 +284,32 @@ async function run() {
       }
     });
 
+    app.patch('/users/moderator/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updatedDoc = {
+        $set: {
+          role: 'moderator',
+        },
+      };
+
+      try {
+        const result = await usersCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     });
+
+    // users, moderator, admin related api---------------------------------
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
