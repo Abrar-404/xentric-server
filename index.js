@@ -8,10 +8,9 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-// middleware
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:5000'],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     optionsSuccessStatus: 204,
@@ -137,7 +136,7 @@ async function run() {
       res.send(result);
     });
 
-    app.post('/myProducts', verifyToken, async (req, res) => {
+    app.post('/myProducts', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
       const result = await myProductsCollection.insertOne(productsAdd);
