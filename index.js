@@ -411,7 +411,7 @@ async function run() {
 
     // Coupons related------------------------
     app.get('/coupons', async (req, res) => {
-      const cursor = allItemCollection.find();
+      const cursor = couponCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -435,8 +435,8 @@ async function run() {
         payment_method_types: ['card'],
       });
       res.send({
-        clientSecret: paymentIntent.client_secret
-      })
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     // Send a ping to confirm a successful connection
