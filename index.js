@@ -46,6 +46,8 @@ async function run() {
 
     const myProductsCollection = client.db('xenricDB').collection('myProducts');
 
+    const couponCollection = client.db('xenricDB').collection('coupons');
+
     const addProductsCollection = client
       .db('xenricDB')
       .collection('addProducts');
@@ -142,6 +144,7 @@ async function run() {
       const result = await myProductsCollection.findOne(query);
       res.send(result);
     });
+
     app.get('/myProducts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -401,6 +404,19 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Coupons related------------------------
+    app.get('/coupons', async (req, res) => {
+      const result = await couponCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post('/coupons', async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await couponCollection.insertOne(productsAdd);
       res.send(result);
     });
 
