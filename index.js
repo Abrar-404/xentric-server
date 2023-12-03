@@ -129,6 +129,12 @@ async function run() {
       res.send(result);
     });
 
+    // all products for moderator----------------------------
+    app.get('/allProducts', async (req, res) => {
+      const result = await myProductsCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get('/myProducts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -186,6 +192,75 @@ async function run() {
       const cursor = allItemCollection.find();
       const result = await cursor.toArray();
       res.send(result);
+    });
+
+    app.get('/allItem', async (req, res) => {
+      try {
+        const cursor = allItemCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error('Error fetching all items:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
+    // Updated /allItem endpoint for search by tag and name
+    // Updated /allItem endpoint for search by tag and name
+    app.get('/allItem', async (req, res) => {
+      try {
+        const { searchQuery, tags } = req.query;
+        console.log('Received searchQuery:', searchQuery);
+        console.log('Received tags:', tags);
+
+        let filter = {};
+
+        // Apply search query if provided
+        if (searchQuery) {
+          filter.name = { $regex: new RegExp(searchQuery, 'i') };
+        }
+
+        // Apply tag filter if provided
+        if (tags) {
+          const tagsArray = tags.split(',');
+          filter.tag = { $in: tagsArray };
+        }
+
+        const result = await allItemCollection.find(filter).toArray();
+
+        res.send(result);
+      } catch (error) {
+        console.error('Error fetching items:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
+    app.get('/allItem', async (req, res) => {
+      try {
+        const { searchQuery, tags } = req.query;
+        console.log('Received searchQuery:', searchQuery);
+        console.log('Received tags:', tags);
+
+        let filter = {};
+
+        // Apply search query if provided
+        if (searchQuery) {
+          filter.name = { $regex: new RegExp(searchQuery, 'i') };
+        }
+
+        // Apply tag filter if provided
+        if (tags) {
+          const tagsArray = tags.split(',');
+          filter['tags.product'] = { $in: tagsArray };
+        }
+
+        const result = await allItemCollection.find(filter).toArray();
+
+        res.send(result);
+      } catch (error) {
+        console.error('Error fetching items:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
     });
 
     app.post('/allItem', verifyToken, async (req, res) => {
