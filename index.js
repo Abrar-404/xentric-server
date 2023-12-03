@@ -52,6 +52,10 @@ async function run() {
     const addProductsCollection = client
       .db('xenricDB')
       .collection('addProducts');
+    
+    const reportedCollection = client
+      .db('xenricDB')
+      .collection('reported');
 
     // const userCollection = client.db('xenricDB').collection('users');
 
@@ -114,6 +118,15 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await featureCardCollection.findOne(query);
+      res.send(result);
+    });
+
+    // report related--------------
+     
+    app.post('/reported/:id', async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await reportedCollection.insertOne(productsAdd);
       res.send(result);
     });
 
