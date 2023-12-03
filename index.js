@@ -102,6 +102,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    
+    app.post('/featureCards', async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await featureCardCollection.insertOne(productsAdd);
+      res.send(result);
+    });
 
     app.get('/featureCards/:id', async (req, res) => {
       const id = req.params.id;
