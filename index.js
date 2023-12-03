@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -406,10 +407,12 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     });
+    // users, moderator, admin related api---------------------------------
 
     // Coupons related------------------------
     app.get('/coupons', async (req, res) => {
-      const result = await couponCollection.find().toArray();
+      const cursor = allItemCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     });
 
@@ -419,8 +422,22 @@ async function run() {
       const result = await couponCollection.insertOne(productsAdd);
       res.send(result);
     });
+    // Coupons related------------------------
 
-    // users, moderator, admin related api---------------------------------
+    // payment related----------------------------
+    app.post('/create-payment-intent', async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
