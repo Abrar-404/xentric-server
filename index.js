@@ -445,6 +445,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/allCoupon/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allCouponCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post('/coupons', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
