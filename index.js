@@ -466,6 +466,30 @@ async function run() {
       res.send(result);
     });
 
+    app.patch('/updateCoupon/:id', async (req, res) => {
+      const item = req.body;
+      console.log(item);
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const option = {
+        upsert: true,
+      };
+      const updatedDoc = {
+        $set: {
+          code: item.code,
+          description: item.description,
+          amount: item.amount,
+          date: item.date,
+        },
+      };
+      const result = await allCouponCollection.updateOne(
+        filter,
+        updatedDoc,
+        option
+      );
+      res.send(result);
+    });
+
     app.delete('/allCoupon/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
