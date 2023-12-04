@@ -11,7 +11,11 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5000'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5000',
+      'https://assignment-12-7a861.web.app',
+    ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     optionsSuccessStatus: 204,
@@ -48,14 +52,13 @@ async function run() {
     const myProductsCollection = client.db('xenricDB').collection('myProducts');
 
     const couponCollection = client.db('xenricDB').collection('coupons');
+    const allCouponCollection = client.db('xenricDB').collection('allCoupon');
 
     const addProductsCollection = client
       .db('xenricDB')
       .collection('addProducts');
-    
-    const reportedCollection = client
-      .db('xenricDB')
-      .collection('reported');
+
+    const reportedCollection = client.db('xenricDB').collection('reported');
 
     // const userCollection = client.db('xenricDB').collection('users');
 
@@ -106,7 +109,7 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-    
+
     app.post('/featureCards', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
@@ -122,7 +125,7 @@ async function run() {
     });
 
     // report related--------------
-     
+
     app.post('/reported/:id', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
@@ -436,10 +439,30 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/allCoupon', async (req, res) => {
+      const cursor = allCouponCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post('/coupons', async (req, res) => {
       const productsAdd = req.body;
       console.log(productsAdd);
       const result = await couponCollection.insertOne(productsAdd);
+      res.send(result);
+    });
+
+    app.post('/allCoupon', async (req, res) => {
+      const productsAdd = req.body;
+      console.log(productsAdd);
+      const result = await allCouponCollection.insertOne(productsAdd);
+      res.send(result);
+    });
+
+    app.delete('/allCoupon/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allCouponCollection.deleteOne(query);
       res.send(result);
     });
     // Coupons related------------------------
