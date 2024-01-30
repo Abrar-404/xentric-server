@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const bodyParser = require("body_parser")
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
@@ -24,6 +25,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eted0lc.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -69,7 +71,6 @@ async function run() {
 
     // own middleware
     const verifyToken = (req, res, next) => {
-      console.log(req.headers.authorization);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'Forbidden Access' });
       }
@@ -264,7 +265,6 @@ async function run() {
 
         res.send(result);
       } catch (error) {
-        console.error('Error fetching items:', error);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
@@ -272,8 +272,6 @@ async function run() {
     app.get('/allItem', async (req, res) => {
       try {
         const { searchQuery, tags } = req.query;
-        console.log('Received searchQuery:', searchQuery);
-        console.log('Received tags:', tags);
 
         let filter = {};
 
@@ -292,14 +290,12 @@ async function run() {
 
         res.send(result);
       } catch (error) {
-        console.error('Error fetching items:', error);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
 
     app.post('/allItem', verifyToken, async (req, res) => {
       const productsAdd = req.body;
-      console.log(productsAdd);
       const result = await allItemCollection.insertOne(productsAdd);
       res.send(result);
     });
@@ -313,7 +309,6 @@ async function run() {
 
     // users, moderator, admin related api---------------------------------
     app.get('/users', async (req, res) => {
-      console.log(req.headers);
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
@@ -454,7 +449,7 @@ async function run() {
 
     app.post('/coupons', async (req, res) => {
       const productsAdd = req.body;
-      console.log(productsAdd);
+
       const result = await couponCollection.insertOne(productsAdd);
       res.send(result);
     });
